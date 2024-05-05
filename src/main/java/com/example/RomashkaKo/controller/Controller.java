@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 public class Controller {
@@ -23,8 +24,10 @@ public class Controller {
     }
 
     @GetMapping(value = "/products")
-    public ResponseEntity<List<Product>> getAll() {
-        final List<Product> products = productService.getProducts();
+    public ResponseEntity<List<Product>> getAll(@RequestParam(required = false) String name,
+                                                @RequestParam(required = false) int lowLimit) {
+
+        final List<Product> products = productService.getProducts(name, lowLimit);
 
         return products != null &&  !products.isEmpty()
                 ? new ResponseEntity<>(products, HttpStatus.OK)

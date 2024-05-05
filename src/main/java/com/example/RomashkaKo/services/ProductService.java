@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface ProductService {
 
-    List<Product> getProducts();
+    List<Product> getProducts(String name, int lowLimit);
     Product getProduct(int id);
     BaseResponse createProduct(Product product);
     boolean updateProduct(Product product, int id);
