@@ -1,0 +1,7 @@
+com\example\RomashkaKo\RomashkaKoApplication.class
+com\example\RomashkaKo\respons\BaseResponse.class
+com\example\RomashkaKo\controller\Controller.class
+com\example\RomashkaKo\services\ProductServiceImpl.class
+com\example\RomashkaKo\model\Product.class
+com\example\RomashkaKo\services\ProductService.class
+com\example\RomashkaKo\repositories\ProductsPepository.class

@@ -1,0 +1,28 @@
+version: "3.8"
+
+services:
+  postgresqldb:
+    image: postgres
+    restart: unless-stopped
+    container_name: db
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: qwertylol
+      POSTGRES_DB: products
+    ports:
+      - "3037:5432"
+  app:
+    depends_on:
+      - postgresqldb
+    build: ./target
+    restart: on-failure
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/products
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=qwertylol
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    stdin_open: true
+    tty: true
+
