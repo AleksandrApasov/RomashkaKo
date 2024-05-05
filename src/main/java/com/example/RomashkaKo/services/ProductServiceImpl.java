@@ -1,9 +1,7 @@
 package com.example.RomashkaKo.services;
 
 import com.example.RomashkaKo.model.Product;
-import com.example.RomashkaKo.repositories.ProductsPepository;
 import com.example.RomashkaKo.respons.BaseResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -15,22 +13,20 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Service
 public class ProductServiceImpl implements ProductService {
 
-    @Autowired
-    private ProductsPepository productsPepository;
+
+    private static final Map<Integer, Product> productMap = new HashMap<>();
 
     private static final AtomicInteger idGenerator = new AtomicInteger();
 
 
     @Override
     public List<Product> getProducts() {
-        return productsPepository.findAll();
+        return new ArrayList<>(productMap.values());
     }
 
     @Override
     public Product getProduct(int id) {
-        if(productsPepository.findById(id).isPresent())
-        return productsPepository.findById(id).get();
-        return null;
+        return productMap.get(id);
     }
 
     @Override
@@ -43,7 +39,9 @@ public class ProductServiceImpl implements ProductService {
         if (product.getPrice() < 0)
             return new BaseResponse("Price is negative",449);
 
-        productsPepository.save(product);
+        final int productId = idGenerator.incrementAndGet();
+        product.setId(productId);
+        productMap.put(productId, product);
         return new BaseResponse("OK",200);
     }
 
@@ -51,9 +49,9 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public boolean updateProduct(Product product,int id) {
-        if (productsPepository.findById(id).isPresent()){
+        if (productMap.containsKey(id)){
             product.setId(id);
-            productsPepository.save(product);
+            productMap.put(id,product);
             return true;
         }
         return false;
@@ -61,8 +59,8 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public boolean deleteProduct(int id) {
-        if (productsPepository.findById(id).isPresent()){
-            productsPepository.deleteById(id);
+        if (productMap.containsKey(id)){
+            productMap.remove(id);
             return true;
         }
         return false;
