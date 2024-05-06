@@ -4,13 +4,12 @@ import com.example.RomashkaKo.model.Product;
 import com.example.RomashkaKo.repositories.ProductsPepository;
 import com.example.RomashkaKo.respons.BaseResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -22,21 +21,36 @@ public class ProductServiceImpl implements ProductService {
 
 
     @Override
-    public List<Product> getProducts(String name, Integer limit, Boolean isLowLimit, Boolean isInStock) {
+    public List<Product> getProducts(String name, Integer limit, Boolean isLowLimit,
+                                     Boolean isInStock, Boolean sortByName,Boolean sortByPrice, Integer limitElements) {
         List<Product> products;
         if(name != null)
-            return productsPepository.findByNameContainingIgnoreCase(name);
-        if (limit != null) {
+            products = productsPepository.findByNameContainingIgnoreCase(name);
+        else if (limit != null) {
             if (isLowLimit == null)
-                return productsPepository.findByPrice(limit);
-            if (isLowLimit)
-                return productsPepository.findByPriceGreaterThan(limit);
-            return productsPepository.findByPriceLessThan(limit);
+                products = productsPepository.findByPrice(limit);
+            else if (isLowLimit)
+                products = productsPepository.findByPriceGreaterThan(limit);
+            else products = productsPepository.findByPriceLessThan(limit);
         }
-        if ((isInStock != null) && (isInStock))
-            return productsPepository.findByInStock(isInStock);
-        return productsPepository.findAll();
+        else if ((isInStock != null) && (isInStock)) {
+            products = productsPepository.findByInStock(isInStock);
+        }
+        else products = productsPepository.findAll();
+        if (sortByName != null)
+            products = products.stream().sorted(compareByName).collect(Collectors.toCollection(ArrayList::new));
+        else if (sortByPrice != null)
+            products = products.stream().sorted(compareByPrice).collect(Collectors.toCollection(ArrayList::new));
+        if (limitElements != null)
+        products = products.stream().limit(limitElements).collect(Collectors.toCollection(ArrayList::new));
+        return products;
+
     }
+
+    Comparator<Product> compareByName = Comparator
+            .comparing(Product::getName, String.CASE_INSENSITIVE_ORDER);
+    Comparator<Product> compareByPrice = Comparator
+            .comparing(Product::getPrice);
 
     @Override
     public Product getProduct(int id) {

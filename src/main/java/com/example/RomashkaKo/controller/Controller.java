@@ -19,7 +19,7 @@ public class Controller {
     private final ProductService productService;
 
     @Autowired
-    public Controller(ProductService productService){
+    public Controller(ProductService productService) {
         this.productService = productService;
     }
 
@@ -27,11 +27,15 @@ public class Controller {
     public ResponseEntity<List<Product>> getAll(@RequestParam(required = false) String name,
                                                 @RequestParam(required = false) Integer limit,
                                                 @RequestParam(required = false) Boolean isLowLimit,
-                                                @RequestParam(required = false) Boolean isInStock) {
+                                                @RequestParam(required = false) Boolean isInStock,
+                                                @RequestParam(required = false) Boolean sortByName,
+                                                @RequestParam(required = false) Boolean sortByPrice,
+                                                @RequestParam(required = false) Integer limitElements) {
 
-        final List<Product> products = productService.getProducts(name,limit,isLowLimit,isInStock);
+        final List<Product> products = productService.getProducts(name, limit, isLowLimit,
+                isInStock, sortByName, sortByPrice, limitElements);
 
-        return products != null &&  !products.isEmpty()
+        return products != null && !products.isEmpty()
                 ? new ResponseEntity<>(products, HttpStatus.OK)
                 : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
