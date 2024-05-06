@@ -25,9 +25,11 @@ public class Controller {
 
     @GetMapping(value = "/products")
     public ResponseEntity<List<Product>> getAll(@RequestParam(required = false) String name,
-                                                @RequestParam(required = false) int lowLimit) {
+                                                @RequestParam(required = false) Integer limit,
+                                                @RequestParam(required = false) Boolean isLowLimit,
+                                                @RequestParam(required = false) Boolean isInStock) {
 
-        final List<Product> products = productService.getProducts(name, lowLimit);
+        final List<Product> products = productService.getProducts(name,limit,isLowLimit,isInStock);
 
         return products != null &&  !products.isEmpty()
                 ? new ResponseEntity<>(products, HttpStatus.OK)

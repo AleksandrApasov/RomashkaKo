@@ -13,6 +13,9 @@ import java.util.List;
 public interface ProductsPepository extends CrudRepository<Product,Integer> {
     List<Product> findAll();
     List<Product> findByNameContainingIgnoreCase(String name);
-    @Query("select * from Product p where p.price > limit")
-    List<Product> findAll(@Param("limit") int limit);
+    List<Product> findByPriceLessThan(int limit);
+    List<Product> findByPriceGreaterThan(int limit);
+    List<Product> findByPrice(int limit);
+    List<Product> findByInStock(boolean isInStock);
+
 }

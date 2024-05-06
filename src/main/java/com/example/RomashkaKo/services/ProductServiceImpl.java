@@ -22,11 +22,19 @@ public class ProductServiceImpl implements ProductService {
 
 
     @Override
-    public List<Product> getProducts(String name, int lowLimit) {
+    public List<Product> getProducts(String name, Integer limit, Boolean isLowLimit, Boolean isInStock) {
+        List<Product> products;
         if(name != null)
             return productsPepository.findByNameContainingIgnoreCase(name);
-        if (lowLimit != 0)
-            return productsPepository.findAll(lowLimit);
+        if (limit != null) {
+            if (isLowLimit == null)
+                return productsPepository.findByPrice(limit);
+            if (isLowLimit)
+                return productsPepository.findByPriceGreaterThan(limit);
+            return productsPepository.findByPriceLessThan(limit);
+        }
+        if ((isInStock != null) && (isInStock))
+            return productsPepository.findByInStock(isInStock);
         return productsPepository.findAll();
     }
 
