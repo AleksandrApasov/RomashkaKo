@@ -1,10 +1,9 @@
 package com.example.RomashkaKo.services;
 
 import com.example.RomashkaKo.model.Product;
-import com.example.RomashkaKo.repositories.ProductsPepository;
+import com.example.RomashkaKo.repositories.ProductsRepository;
 import com.example.RomashkaKo.respons.BaseResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -15,9 +14,8 @@ import java.util.stream.Collectors;
 public class ProductServiceImpl implements ProductService {
 
     @Autowired
-    private ProductsPepository productsPepository;
+    private ProductsRepository productsRepository;
 
-    private static final AtomicInteger idGenerator = new AtomicInteger();
 
 
     @Override
@@ -25,18 +23,18 @@ public class ProductServiceImpl implements ProductService {
                                      Boolean isInStock, Boolean sortByName,Boolean sortByPrice, Integer limitElements) {
         List<Product> products;
         if(name != null)
-            products = productsPepository.findByNameContainingIgnoreCase(name);
+            products = productsRepository.findByNameContainingIgnoreCase(name);
         else if (limit != null) {
             if (isLowLimit == null)
-                products = productsPepository.findByPrice(limit);
+                products = productsRepository.findByPrice(limit);
             else if (isLowLimit)
-                products = productsPepository.findByPriceGreaterThan(limit);
-            else products = productsPepository.findByPriceLessThan(limit);
+                products = productsRepository.findByPriceGreaterThan(limit);
+            else products = productsRepository.findByPriceLessThan(limit);
         }
         else if ((isInStock != null) && (isInStock)) {
-            products = productsPepository.findByInStock(isInStock);
+            products = productsRepository.findByInStock(isInStock);
         }
-        else products = productsPepository.findAll();
+        else products = productsRepository.findAll();
         if (sortByName != null)
             products = products.stream().sorted(compareByName).collect(Collectors.toCollection(ArrayList::new));
         else if (sortByPrice != null)
@@ -54,8 +52,8 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Product getProduct(int id) {
-        if(productsPepository.findById(id).isPresent())
-        return productsPepository.findById(id).get();
+        if(productsRepository.findById(id).isPresent())
+        return productsRepository.findById(id).get();
         return null;
     }
 
@@ -69,7 +67,7 @@ public class ProductServiceImpl implements ProductService {
         if (product.getPrice() < 0)
             return new BaseResponse("Price is negative",449);
 
-        productsPepository.save(product);
+        productsRepository.save(product);
         return new BaseResponse("OK",200);
     }
 
@@ -77,9 +75,9 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public boolean updateProduct(Product product,int id) {
-        if (productsPepository.findById(id).isPresent()){
+        if (productsRepository.findById(id).isPresent()){
             product.setId(id);
-            productsPepository.save(product);
+            productsRepository.save(product);
             return true;
         }
         return false;
@@ -87,8 +85,8 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public boolean deleteProduct(int id) {
-        if (productsPepository.findById(id).isPresent()){
-            productsPepository.deleteById(id);
+        if (productsRepository.findById(id).isPresent()){
+            productsRepository.deleteById(id);
             return true;
         }
         return false;

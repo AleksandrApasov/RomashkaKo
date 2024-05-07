@@ -1,26 +1,32 @@
 package com.example.RomashkaKo.controller;
 
 
+import com.example.RomashkaKo.model.SupplyOfProducts;
 import com.example.RomashkaKo.respons.BaseResponse;
 import com.example.RomashkaKo.model.Product;
 import com.example.RomashkaKo.services.ProductService;
+import com.example.RomashkaKo.services.SuppliesOfProductsService;
+import com.example.RomashkaKo.services.SuppliesOfProductsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 public class Controller {
 
 
     private final ProductService productService;
+    private final SuppliesOfProductsService suppliesOfProductsService;
+
 
     @Autowired
-    public Controller(ProductService productService) {
+    public Controller(ProductService productService,SuppliesOfProductsService suppliesOfProductsService) {
         this.productService = productService;
+        this.suppliesOfProductsService = suppliesOfProductsService;
+
     }
 
     @GetMapping(value = "/products")
@@ -68,4 +74,44 @@ public class Controller {
                 ? new ResponseEntity<>(HttpStatus.OK)
                 : new ResponseEntity<>(HttpStatus.NOT_MODIFIED);
     }
+
+    @GetMapping(value = "/supplies")
+    public ResponseEntity<List<SupplyOfProducts>> getAll() {
+
+        final List<SupplyOfProducts> supplies = suppliesOfProductsService.getSupplies();
+
+        return supplies != null && !supplies.isEmpty()
+                ? new ResponseEntity<>(supplies, HttpStatus.OK)
+                : new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    @PostMapping(value = "/supplies")
+    public BaseResponse create(@RequestBody SupplyOfProducts supplyOfProducts,
+                               @RequestParam(required = true) Integer productId) {
+        return suppliesOfProductsService.createSupply(supplyOfProducts,productId);
+    }
+
+    @GetMapping(value = "/supplies/{id}")
+    public ResponseEntity<SupplyOfProducts> getSupply(@PathVariable(name = "id") int id) {
+        final SupplyOfProducts supplyOfProducts = suppliesOfProductsService.getSupply(id);
+
+        return supplyOfProducts != null
+                ? new ResponseEntity<>(supplyOfProducts, HttpStatus.OK)
+                : new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+//    @DeleteMapping(value = "/supplies/{id}")
+//    public ResponseEntity<SupplyOfProducts> delete(@PathVariable(name = "id") int id) {
+//        return productService.deleteProduct(id)
+//                ? new ResponseEntity<>(HttpStatus.OK)
+//                : new ResponseEntity<>(HttpStatus.NOT_FOUND);
+//    }
+//
+//    @PutMapping(value = "/supplies/{id}")
+//    public ResponseEntity<?> update(@PathVariable(name = "id") int id, @RequestBody SupplyOfProducts supplyOfProducts) {
+//        final boolean updated = productService.updateProduct(SupplyOfProducts, id);
+//        return updated
+//                ? new ResponseEntity<>(HttpStatus.OK)
+//                : new ResponseEntity<>(HttpStatus.NOT_MODIFIED);
+//    }
 }
