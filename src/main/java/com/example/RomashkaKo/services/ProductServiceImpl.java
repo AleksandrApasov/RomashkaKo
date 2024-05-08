@@ -2,12 +2,13 @@ package com.example.RomashkaKo.services;
 
 import com.example.RomashkaKo.model.Product;
 import com.example.RomashkaKo.repositories.ProductsRepository;
-import com.example.RomashkaKo.respons.BaseResponse;
+import com.example.RomashkaKo.respons.ErrorsListResponse;
+import com.example.RomashkaKo.respons.ParentResponse;
+import com.example.RomashkaKo.respons.StatusResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Service
@@ -58,17 +59,17 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public BaseResponse createProduct(Product product) {
+    public ParentResponse createProduct(Product product) {
 
         if (product.getName().length() > 255)
-            return new BaseResponse("Too large name",413);
+            return new StatusResponse("Too large name");
         if (product.getDescription().length() > 4096)
-            return new BaseResponse("Too large description",413);
+            return new StatusResponse("Too large description");
         if (product.getPrice() < 0)
-            return new BaseResponse("Price is negative",449);
+            return new StatusResponse("Price is negative");
 
         productsRepository.save(product);
-        return new BaseResponse("OK",200);
+        return new StatusResponse("OK");
     }
 
 

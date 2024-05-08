@@ -1,12 +1,15 @@
 package com.example.RomashkaKo.controller;
 
 
+import com.example.RomashkaKo.model.SaleOfProducts;
 import com.example.RomashkaKo.model.SupplyOfProducts;
-import com.example.RomashkaKo.respons.BaseResponse;
+import com.example.RomashkaKo.repositories.SalesOfProductsRepository;
+import com.example.RomashkaKo.respons.ErrorsListResponse;
 import com.example.RomashkaKo.model.Product;
+import com.example.RomashkaKo.respons.ParentResponse;
 import com.example.RomashkaKo.services.ProductService;
+import com.example.RomashkaKo.services.SalesOfProductsService;
 import com.example.RomashkaKo.services.SuppliesOfProductsService;
-import com.example.RomashkaKo.services.SuppliesOfProductsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,12 +23,15 @@ public class Controller {
 
     private final ProductService productService;
     private final SuppliesOfProductsService suppliesOfProductsService;
+    private final SalesOfProductsService salesOfProductsService;
 
 
     @Autowired
-    public Controller(ProductService productService,SuppliesOfProductsService suppliesOfProductsService) {
+    public Controller(ProductService productService,SuppliesOfProductsService suppliesOfProductsService,
+                      SalesOfProductsService salesOfProductsService) {
         this.productService = productService;
         this.suppliesOfProductsService = suppliesOfProductsService;
+        this.salesOfProductsService = salesOfProductsService;
 
     }
 
@@ -47,7 +53,7 @@ public class Controller {
     }
 
     @PostMapping(value = "/products")
-    public BaseResponse create(@RequestBody Product product) {
+    public ParentResponse create(@RequestBody Product product) {
         return productService.createProduct(product);
     }
 
@@ -86,8 +92,8 @@ public class Controller {
     }
 
     @PostMapping(value = "/supplies")
-    public BaseResponse create(@RequestBody SupplyOfProducts supplyOfProducts,
-                               @RequestParam(required = true) Integer productId) {
+    public ParentResponse create(@RequestBody SupplyOfProducts supplyOfProducts,
+                                 @RequestParam(required = true) Integer productId) {
         return suppliesOfProductsService.createSupply(supplyOfProducts,productId);
     }
 
@@ -100,18 +106,58 @@ public class Controller {
                 : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-//    @DeleteMapping(value = "/supplies/{id}")
-//    public ResponseEntity<SupplyOfProducts> delete(@PathVariable(name = "id") int id) {
-//        return productService.deleteProduct(id)
-//                ? new ResponseEntity<>(HttpStatus.OK)
-//                : new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//    }
-//
-//    @PutMapping(value = "/supplies/{id}")
-//    public ResponseEntity<?> update(@PathVariable(name = "id") int id, @RequestBody SupplyOfProducts supplyOfProducts) {
-//        final boolean updated = productService.updateProduct(SupplyOfProducts, id);
-//        return updated
-//                ? new ResponseEntity<>(HttpStatus.OK)
-//                : new ResponseEntity<>(HttpStatus.NOT_MODIFIED);
-//    }
+    @DeleteMapping(value = "/supplies/{id}")
+    public ResponseEntity<SupplyOfProducts> deleteSupply(@PathVariable(name = "id") int id) {
+        return suppliesOfProductsService.deleteSupply(id)
+                ? new ResponseEntity<>(HttpStatus.OK)
+                : new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    @PutMapping(value = "/supplies/{id}")
+    public ResponseEntity<?> update(@PathVariable(name = "id") int id, @RequestBody SupplyOfProducts supplyOfProducts,
+                                    @RequestParam(required = false) Integer productId) {
+        final boolean updated = suppliesOfProductsService.updateSupply(supplyOfProducts, id, productId);
+        return updated
+                ? new ResponseEntity<>(HttpStatus.OK)
+                : new ResponseEntity<>(HttpStatus.NOT_MODIFIED);
+    }
+
+    //----------------------------------------------
+    @GetMapping(value = "/sales")
+    public ResponseEntity<List<SaleOfProducts>> getAllSales() {
+
+        final List<SaleOfProducts> sales = salesOfProductsService.getSales();
+
+        return sales != null && !sales.isEmpty()
+                ? new ResponseEntity<>(sales, HttpStatus.OK)
+                : new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    @PostMapping(value = "/sales")
+    public ParentResponse createSale(@RequestBody SaleOfProducts saleOfProducts,
+                                 @RequestParam(required = true) Integer productId) {
+        return salesOfProductsService.createSale(saleOfProducts,productId);
+    }
+
+    @GetMapping(value = "/sales/{id}")
+    public ResponseEntity<SaleOfProducts> getSale(@PathVariable(name = "id") int id) {
+        final SaleOfProducts saleOfProducts = salesOfProductsService.getSale(id);
+
+        return saleOfProducts != null
+                ? new ResponseEntity<>(saleOfProducts, HttpStatus.OK)
+                : new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    @DeleteMapping(value = "/sales/{id}")
+    public ResponseEntity<?> deleteSale(@PathVariable(name = "id") int id) {
+        return salesOfProductsService.deleteSale(id)
+                ? new ResponseEntity<>(HttpStatus.OK)
+                : new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    @PutMapping(value = "/sales/{id}")
+    public ParentResponse update(@PathVariable(name = "id") int id, @RequestBody SaleOfProducts saleOfProducts,
+                                    @RequestParam(required = false) Integer productId) {
+        return salesOfProductsService.updateSale(saleOfProducts, id, productId);
+    }
 }
