@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 @Data
@@ -17,8 +18,9 @@ public class SaleOfProducts {
     @NotNull
     @ManyToOne(cascade = CascadeType.PERSIST)
     Product product;
-
     @Min(1)
     private int countOfSoldProduct;
+    @ColumnDefault("0")
+    private int costOfSale;
 
 }

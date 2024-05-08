@@ -48,17 +48,9 @@ public class SalesOfProductsServiceImpl implements SalesOfProductsService {
                 return new StatusResponse("Count of sales product more than count of product in stock");
             product.setCount(product.getCount() - saleOfProducts.getCountOfSoldProduct());
             saleOfProducts.setProduct(product);
+            countCostOfSale(saleOfProducts,product);
         } else return new StatusResponse("Non-existing product");
-        try {
-            salesOfProductsRepository.save(saleOfProducts);
-        } catch (ConstraintViolationException e) {
-            return new ErrorsListResponse("Error", e.getConstraintViolations().stream().
-                    map(ConstraintViolation::getMessage).collect(Collectors.toList()));
-        }
-        if (product.getCount() > 0)
-            product.setInStock(true);
-        productsRepository.save(product);
-        return new StatusResponse("OK");
+        return safeSaveOfSale(saleOfProducts,product);
     }
 
     @Override
@@ -81,24 +73,20 @@ public class SalesOfProductsServiceImpl implements SalesOfProductsService {
                 productNew.setCount(productNew.getCount() - saleOfProducts.getCountOfSoldProduct());
                 productNew.setInStock(productNew.getCount() > 0);
                 saleOfProducts.setProduct(productNew);
+                countCostOfSale(saleOfProducts,productNew);
+                ParentResponse response = safeSaveOfSale(saleOfProducts, productNew);
+                if (response.getStatus().equals("OK"))
+                    productsRepository.save(productOld);
+                return response;
 
             } else {
                 countDifference = saleOfProductsOld.getCountOfSoldProduct() - saleOfProducts.getCountOfSoldProduct();
                 productOld.setCount(productOld.getCount() + countDifference);
                 productOld.setInStock(productOld.getCount() > 0);
                 saleOfProducts.setProduct(productOld);
+                countCostOfSale(saleOfProducts,productOld);
+                return safeSaveOfSale(saleOfProducts, productOld);
             }
-            try {
-                salesOfProductsRepository.save(saleOfProducts);
-            } catch (ConstraintViolationException e) {
-                return new ErrorsListResponse("Error", e.getConstraintViolations().stream().
-                        map(ConstraintViolation::getMessage).collect(Collectors.toList()));
-            }
-            if (productNew != null)
-                productsRepository.save(productNew);
-            productsRepository.save(productOld);
-
-            return new StatusResponse("OK");
         }
         return new StatusResponse("Non-existing sale");
     }
@@ -112,5 +100,22 @@ public class SalesOfProductsServiceImpl implements SalesOfProductsService {
         return false;
     }
 
+    public void countCostOfSale(SaleOfProducts saleOfProducts, Product product ){
+        saleOfProducts.setCostOfSale(saleOfProducts.getCountOfSoldProduct()*product.getPrice());
+    }
+
+    public ParentResponse safeSaveOfSale(SaleOfProducts saleOfProducts,Product product){
+        try {
+            salesOfProductsRepository.save(saleOfProducts);
+        } catch (ConstraintViolationException e) {
+            return new ErrorsListResponse("Error", e.getConstraintViolations().stream().
+                    map(ConstraintViolation::getMessage).collect(Collectors.toList()));
+        }
+        if (product.getCount() > 0)
+            product.setInStock(true);
+        productsRepository.save(product);
+        return new StatusResponse("OK");
+
+    }
 
 }
